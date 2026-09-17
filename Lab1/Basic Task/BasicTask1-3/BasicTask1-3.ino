@@ -1,12 +1,14 @@
 const int ledPin = 11;
-int light = 1;
+int light = 0;
+
 void setup() {
-pinMode(ledPin, OUTPUT);
-analogWrite (ledPin, 35);
+  pinMode(ledPin, OUTPUT);
+  analogWrite (ledPin, 255);
 }
+
 void loop() {
-  light += 10;
+  light += 1;
   analogWrite (ledPin, light);
-  if (light == 1000) light = 1;
-  delay(50);
+  if (light >= 255) light = 0;
+  delay(5);
 }

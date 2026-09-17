@@ -1,15 +1,11 @@
-const int buttonPin = 2;
-const int ledPin = 13;
-int buttonState = 0;
-void setup() {
-pinMode(ledPin, OUTPUT);
-pinMode(buttonPin, INPUT);
+#include <Servo.h>
+Servo myservo;
+void setup()
+{
+myservo.attach(9);
+myservo.write(0);
 }
 void loop() {
-buttonState = digitalRead(buttonPin);
-if (buttonState == 1) {
-digitalWrite(ledPin, HIGH);
-} else {
-digitalWrite(ledPin, LOW);
-}
+int data = 90;
+myservo.write(data);
 }

@@ -1,46 +1,41 @@
 const int rPin = 11, gPin = 10, bPin = 9;
-const int nPin = A5;
+const int readPin = A0;
 const int buttonPin = 2;
-int light = 1;
-int state = 0;
-int buttonState = 0; 
+bool state = false;
+unsigned long lastPrint = 0;
 
 void setup() {
   Serial.begin(9600);
   pinMode(rPin, OUTPUT);
   pinMode(gPin, OUTPUT);
   pinMode(bPin, OUTPUT);
-  pinMode(nPin, INPUT);
+  pinMode(readPin, INPUT);
   pinMode(buttonPin, INPUT);
 }
 
 void loop() {
+  int light, buttonState;
   buttonState = digitalRead(buttonPin);
-  light = analogRead (nPin); // 1024;
-  //state = Serial.parseInt();
+  light = analogRead (readPin);
   if(Serial.available() > 0){
-    state = 1;
+    char c = Serial.read();
+    switch (c) {
+      case '1':
+        state = true;
+        break;
+      case '0':
+        state = false;
+         break;
+       default:
+          break;
+    }
   }
-  Serial.print("Data is ");
-  Serial.print(light);
-  Serial.print("\n");
-  if(state == 0){
-  if (buttonState == 1){
-    analogWrite (rPin, 0);
-    analogWrite (gPin, 1023);
-    analogWrite (bPin, 0);
+  analogWrite(gPin, state ? 0 : 255);
+  analogWrite(rPin, buttonState == 1 ? 0 : 255);
+  analogWrite (bPin, 255 - light / 4);
+  if(millis() - lastPrint >= 1000){
+    Serial.print("Data is ");
+    Serial.println(light);
+    lastPrint += 1000;
   }
-  else{
-    analogWrite (rPin, 1023);
-    analogWrite (gPin, 1023);
-    analogWrite (bPin, 1023-light);
-    //Serial.print("get");
-  }
-  }
-  else{
-    analogWrite (rPin, 0);
-    analogWrite (gPin, 0);
-    analogWrite (bPin, 0);
-  }
-  delay(50);
 }

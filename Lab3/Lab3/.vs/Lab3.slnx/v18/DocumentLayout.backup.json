@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{BD6B9E9E-3E19-1E62-5DC0-58D981F02584}|Lab3\\Lab3.csproj|C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\lab3\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{BD6B9E9E-3E19-1E62-5DC0-58D981F02584}|Lab3\\Lab3.csproj|solutionrelative:lab3\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{131FC7B0-6346-CDF6-A42D-50D40DEAF64E}|Lab3\\Task3-2.csproj|c:\\users\\eason\\documents\\githubrepo\\113511108_mevr_arduino_lab\\lab3\\lab3\\lab3\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{131FC7B0-6346-CDF6-A42D-50D40DEAF64E}|Lab3\\Task3-2.csproj|solutionrelative:lab3\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BD6B9E9E-3E19-1E62-5DC0-58D981F02584}|Lab3\\Lab3.csproj|c:\\users\\eason\\documents\\githubrepo\\113511108_mevr_arduino_lab\\lab3\\lab3\\lab3\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BD6B9E9E-3E19-1E62-5DC0-58D981F02584}|Lab3\\Lab3.csproj|solutionrelative:lab3\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{131FC7B0-6346-CDF6-A42D-50D40DEAF64E}|Lab3\\Task3-2.csproj|c:\\users\\eason\\documents\\githubrepo\\113511108_mevr_arduino_lab\\lab3\\lab3\\lab3\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{131FC7B0-6346-CDF6-A42D-50D40DEAF64E}|Lab3\\Task3-2.csproj|solutionrelative:lab3\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
   "DocumentGroupContainers": [
@@ -23,27 +23,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Form1.cs",
-              "DocumentMoniker": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\Form1.cs",
-              "RelativeDocumentMoniker": "Lab3\\Form1.cs",
-              "ToolTip": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\Form1.cs",
-              "RelativeToolTip": "Lab3\\Form1.cs",
-              "ViewState": "AgIAAAgAAAAAAAAAAAAkwBIAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-30T22:30:31.713Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
               "Title": "Form1.cs [\u8A2D\u8A08]",
               "DocumentMoniker": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\Form1.cs",
               "RelativeDocumentMoniker": "Lab3\\Form1.cs",
               "ToolTip": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\Form1.cs [\u8A2D\u8A08]",
               "RelativeToolTip": "Lab3\\Form1.cs [\u8A2D\u8A08]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-28T07:06:05.164Z",
+              "WhenOpened": "2026-09-30T23:13:31.525Z",
               "EditorCaption": " [\u8A2D\u8A08]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\Form1.cs",
+              "RelativeDocumentMoniker": "Lab3\\Form1.cs",
+              "ToolTip": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\Form1.cs",
+              "RelativeToolTip": "Lab3\\Form1.cs",
+              "ViewState": "AgIAACUAAAAAAAAAAAAUwH0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-30T22:30:31.713Z",
+              "EditorCaption": ""
             }
           ]
         }

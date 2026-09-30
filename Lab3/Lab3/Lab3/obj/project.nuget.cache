@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Cehtbo8EY+A=",
+  "dgSpecHash": "4MSdBLLuYs8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\Task3-2.csproj",
+  "projectFilePath": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\Lab3.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\eason\\.nuget\\packages\\runtime.android-arm.runtime.native.system.io.ports\\10.0.12\\runtime.android-arm.runtime.native.system.io.ports.10.0.12.nupkg.sha512",
     "C:\\Users\\eason\\.nuget\\packages\\runtime.android-arm64.runtime.native.system.io.ports\\10.0.12\\runtime.android-arm64.runtime.native.system.io.ports.10.0.12.nupkg.sha512",

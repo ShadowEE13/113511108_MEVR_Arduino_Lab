@@ -1723,9 +1723,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\Task3-2.csproj",
-      "projectName": "Task3-2",
-      "projectPath": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\Task3-2.csproj",
+      "projectUniqueName": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\Lab3.csproj",
+      "projectName": "Lab3",
+      "projectPath": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\Lab3.csproj",
       "packagesPath": "C:\\Users\\eason\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\eason\\Documents\\GithubRepo\\113511108_MEVR_Arduino_Lab\\Lab3\\Lab3\\Lab3\\obj\\",
       "projectStyle": "PackageReference",

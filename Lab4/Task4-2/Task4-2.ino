@@ -6,8 +6,7 @@
  * 接線
  *   HC-SR04 : VCC→5V   GND→GND   Trig→D7   Echo→D8
  *   SG90    : 紅→5V    棕→GND    橘(訊號)→D9
- *   ※ 舵機建議用外部 5V 供電（GND 要和 Arduino 共地），
- *     或至少在舵機電源兩端並一顆 470µF 電容，避免電壓掉下去造成重開機/量測亂跳。
+ *   *在舵機電源兩端並一顆 470µF 電容
  *
  * 即時調參（Serial Monitor，115200 baud，行尾選 LF 或 Both NL & CR）
  *   p3.5   設定 Kp        i0.8   設定 Ki        d2.5   設定 Kd
@@ -18,21 +17,20 @@
  */
 #include <Servo.h>
 
-// ================= 腳位 =================
+// ===== 腳位 =====
 const uint8_t TRIG_PIN  = 7;
 const uint8_t ECHO_PIN  = 8;
 const uint8_t SERVO_PIN = 9;
 
-// ================= 機構參數（依實體調整） =================
+// ===== 機構參數 =====
 float baseAngle = 90.0;            // 軌道「真正水平」時的舵機角度，要實測校正（指令 b）
-const float TILT_LIMIT = 15.0;     // 最多偏離水平 ±15°，即 75°~105°
+const float TILT_LIMIT = 15.0;     // 最多偏離水平 ±15°
 const int   DIR = +1;              // 球往「離目標更遠」的方向跑 → 改成 -1
 const float MIN_CM = 2.0;          // HC-SR04 最近約 2 cm
 const float MAX_CM = 40.0;         // 比軌道長一點；超過就當成錯誤讀值
 
-// ================= PID 參數 =================
+// ===== PID 參數 =====
 float setpoint = 15.0;             // 目標：球距離感測器 15 cm
-// 起始值來自模擬（舵機臂 2 cm、連到離支點 15 cm 處）；實體一定要再微調
 float Kp = 2.0;                    // 單位：度 / cm
 float Ki = 0.8;                    // 單位：度 / (cm·s)
 float Kd = 2.0;                    // 單位：度 / (cm/s)
@@ -40,7 +38,7 @@ const float I_LIMIT  = 5.0;        // 積分項最多貢獻 ±5°（anti-windup�
 const float I_BAND   = 4.0;        // 誤差小於 4 cm 才累積積分（積分分離）
 const float D_ALPHA  = 0.5;        // 微分項低通濾波係數（0~1，越小越平滑但越慢）
 
-// ================= 取樣 / 濾波 =================
+// ===== 取樣 / 濾波 =====
 const unsigned long SAMPLE_MS = 50;  // 20 Hz 控制迴圈
 const uint8_t N_AVG = 5;             // 移動平均長度
 

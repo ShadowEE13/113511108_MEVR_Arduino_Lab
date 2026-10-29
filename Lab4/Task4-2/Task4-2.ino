@@ -4,48 +4,52 @@
  * 硬體：Arduino UNO + HC-SR04 超音波 + SG90 舵機 + 乒乓球
  *
  * 接線
- *   HC-SR04 : VCC→5V   GND→GND   Trig→D7   Echo→D8
- *   SG90    : 紅→5V    棕→GND    橘(訊號)→D9
- *   *在舵機電源兩端並一顆 470µF 電容
+ *   HC-SR04 : VCC→5V   GND→GND   Trig→D2   Echo→D3
+ *   SG90    : 紅→5V    棕→GND    橘(訊號)→D5
+ *   ※ 舵機建議用外部 5V 供電（GND 要和 Arduino 共地），
+ *     或至少在舵機電源兩端並一顆 470µF 電容，避免電壓掉下去造成重開機/量測亂跳。
  *
  * 即時調參（Serial Monitor，115200 baud，行尾選 LF 或 Both NL & CR）
  *   p3.5   設定 Kp        i0.8   設定 Ki        d2.5   設定 Kd
  *   s15    設定目標距離 (cm)                    b90    設定水平角 (度)
+ *   t500   每 500 ms 印一筆資料（t0 = 停止印，t200 = 恢復預設）
  *   r      積分歸零        ?      印出目前參數
+ *   ※ 每次下指令後，資料會暫停印 3 秒，讓你看得到回報
  *
  * 輸出：Serial Plotter 會畫出 target / pos / tilt 三條線
  */
 #include <Servo.h>
 
-// ===== 腳位 =====
-const uint8_t TRIG_PIN  = 7;
-const uint8_t ECHO_PIN  = 8;
-const uint8_t SERVO_PIN = 9;
+// ================= 腳位 =================
+const uint8_t TRIG_PIN  = 2;
+const uint8_t ECHO_PIN  = 3;
+const uint8_t SERVO_PIN = 5;       // Servo 函式庫用 Timer1 中斷產生脈衝，任何數位腳都能接
 
-// ===== 機構參數 =====
-float baseAngle = 90.0;            // 軌道「真正水平」時的舵機角度，要實測校正（指令 b）
-const float TILT_LIMIT = 15.0;     // 最多偏離水平 ±15°
+// ================= 機構參數（依實體調整） =================
+float baseAngle = 142.0;           // 軌道水平時的舵機角度（實測：球放著不會自己滾）
+const float TILT_LIMIT = 20.0;     // 最多偏離水平 ±15°，即 125°~155°
 const int   DIR = +1;              // 球往「離目標更遠」的方向跑 → 改成 -1
 const float MIN_CM = 2.0;          // HC-SR04 最近約 2 cm
-const float MAX_CM = 40.0;         // 比軌道長一點；超過就當成錯誤讀值
+const float MAX_CM = 25.0;         // 比軌道長一點；超過就當成錯誤讀值
 
-// ===== PID 參數 =====
-float setpoint = 15.0;             // 目標：球距離感測器 15 cm
+// ================= PID 參數 =================
+float setpoint = 10.5;             // 目標：軌道中間，球距離感測器 10.5 cm（實測）
+// 起始值來自模擬（舵機臂 2 cm、連到離支點 15 cm 處）；實體一定要再微調
 float Kp = 2.0;                    // 單位：度 / cm
 float Ki = 0.8;                    // 單位：度 / (cm·s)
-float Kd = 2.0;                    // 單位：度 / (cm/s)
+float Kd = 4.0;                    // 單位：度 / (cm/s)
 const float I_LIMIT  = 5.0;        // 積分項最多貢獻 ±5°（anti-windup）
-const float I_BAND   = 4.0;        // 誤差小於 4 cm 才累積積分（積分分離）
+const float I_BAND   = 5.0;        // 誤差小於 5 cm 才累積積分（積分分離）
 const float D_ALPHA  = 0.5;        // 微分項低通濾波係數（0~1，越小越平滑但越慢）
 
-// ===== 取樣 / 濾波 =====
+// ================= 取樣 / 濾波 =================
 const unsigned long SAMPLE_MS = 50;  // 20 Hz 控制迴圈
 const uint8_t N_AVG = 5;             // 移動平均長度
 
 Servo servo;
 
 // 濾波器狀態
-float lastValid = 15.0;
+float lastValid = 0;                 // setup() 會用第一筆讀值填入
 float hist[3];                       // 中位數用：最近 3 筆
 float avgBuf[N_AVG];                 // 移動平均用：環形緩衝區
 uint8_t avgIdx = 0;
@@ -60,6 +64,12 @@ unsigned long lastMs = 0;
 // 序列指令
 char cmdBuf[16];
 uint8_t cmdLen = 0;
+
+// 印資料控制（和控制迴圈分開：印慢一點不影響 PID 的 50 ms 週期）
+unsigned long printMs = 200;         // 印資料間隔 (ms)，0 = 不印；最快就是 SAMPLE_MS
+unsigned long lastPrintMs = 0;
+unsigned long holdStart = 0;         // 最近一次回報指令的時間
+const unsigned long HOLD_MS = 3000;  // 回報後暫停印資料 3 秒
 
 // ------------------------------------------------------------
 // HC-SR04：回傳距離 (cm)，讀不到回傳 -1
@@ -137,7 +147,9 @@ void printParams() {
   Serial.print(F(" Ki="));  Serial.print(Ki);
   Serial.print(F(" Kd="));  Serial.print(Kd);
   Serial.print(F(" set=")); Serial.print(setpoint);
-  Serial.print(F(" base="));Serial.println(baseAngle);
+  Serial.print(F(" base="));Serial.print(baseAngle);
+  Serial.print(F(" print="));Serial.println(printMs);
+  holdStart = millis();              // 開始暫停印資料
 }
 
 void runCommand(char *s) {
@@ -148,9 +160,13 @@ void runCommand(char *s) {
     case 'd': Kd = v; break;
     case 's': setpoint = v; break;
     case 'b': baseAngle = v; break;
+    case 't': printMs = (v < 0) ? 0 : (unsigned long)v; break;
     case 'r': integral = 0; break;
     case '?': break;
-    default:  Serial.println(F("# 指令: p i d s b r ?")); return;
+    default:
+      Serial.println(F("# 指令: p i d s b t r ?"));
+      holdStart = millis();
+      return;
   }
   printParams();
 }
@@ -205,8 +221,13 @@ void loop() {
   float tilt = constrain(computePID(pos, dt), -TILT_LIMIT, TILT_LIMIT);
   writeServo(baseAngle + DIR * tilt);
 
-  // Serial Plotter 格式 → label:value
-  Serial.print(F("target:")); Serial.print(setpoint);
-  Serial.print(F(",pos:"));   Serial.print(pos);
-  Serial.print(F(",tilt:"));  Serial.println(tilt);
+  // 印資料：有設間隔、不在暫停時間內、而且到時間了才印
+  bool holding = (now - holdStart < HOLD_MS);
+  if (printMs > 0 && !holding && now - lastPrintMs >= printMs) {
+    lastPrintMs = now;
+    // Serial Plotter 格式 → label:value
+    Serial.print(F("target:")); Serial.print(setpoint);
+    Serial.print(F(",pos:"));   Serial.print(pos);
+    Serial.print(F(",tilt:"));  Serial.println(tilt);
+  }
 }

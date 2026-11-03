@@ -4,8 +4,8 @@
  * 硬體：Arduino UNO + HC-SR04 超音波 + SG90 舵機 + 乒乓球
  *
  * 接線
- *   HC-SR04 : VCC→5V   GND→GND   Trig→D2   Echo→D3
- *   SG90    : 紅→5V    棕→GND    橘(訊號)→D5
+ *   HC-SR04 : VCC→5V   GND→GND   Trig→D10  Echo→D11
+ *   SG90    : 紅→5V    棕→GND    橘(訊號)→D9
  *   ※ 舵機建議用外部 5V 供電（GND 要和 Arduino 共地），
  *     或至少在舵機電源兩端並一顆 470µF 電容，避免電壓掉下去造成重開機/量測亂跳。
  *
@@ -21,35 +21,39 @@
 #include <Servo.h>
 
 // ================= 腳位 =================
-const uint8_t TRIG_PIN  = 2;
-const uint8_t ECHO_PIN  = 3;
-const uint8_t SERVO_PIN = 5;       // Servo 函式庫用 Timer1 中斷產生脈衝，任何數位腳都能接
+const uint8_t TRIG_PIN  = 10;
+const uint8_t ECHO_PIN  = 11;
+const uint8_t SERVO_PIN = 9;       // Servo 函式庫佔用 Timer1 → D9、D10 不能再用 analogWrite()，
+                                   // 但 digitalWrite() 照常可用，所以 Trig 接 D10 沒問題
 
 // ================= 機構參數（依實體調整） =================
-float baseAngle = 142.0;           // 軌道水平時的舵機角度（實測：球放著不會自己滾）
-const float TILT_LIMIT = 20.0;     // 最多偏離水平 ±15°，即 125°~155°
+float baseAngle = 141.0;           // 軌道水平時的舵機角度（實測：球放著不會自己滾）
+const float TILT_LIMIT = 17.0;     // 最多偏離水平 ±17°，即 124°~158°
 const int   DIR = +1;              // 球往「離目標更遠」的方向跑 → 改成 -1
 const float MIN_CM = 2.0;          // HC-SR04 最近約 2 cm
 const float MAX_CM = 25.0;         // 比軌道長一點；超過就當成錯誤讀值
 
 // ================= PID 參數 =================
 float setpoint = 10.5;             // 目標：軌道中間，球距離感測器 10.5 cm（實測）
-// 起始值來自模擬（舵機臂 2 cm、連到離支點 15 cm 處）；實體一定要再微調
+// Kp、Ki 沿用模擬的起始值；Kd 依實體測試調整為 4.5
 float Kp = 2.0;                    // 單位：度 / cm
 float Ki = 0.8;                    // 單位：度 / (cm·s)
-float Kd = 4.0;                    // 單位：度 / (cm/s)
+float Kd = 4.5;                    // 單位：度 / (cm/s)
 const float I_LIMIT  = 5.0;        // 積分項最多貢獻 ±5°（anti-windup）
-const float I_BAND   = 5.0;        // 誤差小於 5 cm 才累積積分（積分分離）
+const float I_BAND   = 3.0;        // 誤差小於 3 cm 才累積積分（積分分離）
 const float D_ALPHA  = 0.5;        // 微分項低通濾波係數（0~1，越小越平滑但越慢）
 
 // ================= 取樣 / 濾波 =================
 const unsigned long SAMPLE_MS = 50;  // 20 Hz 控制迴圈
-const uint8_t N_AVG = 5;             // 移動平均長度
+const uint8_t N_AVG = 4;             // 移動平均長度（4 筆 → 平均延遲約 75 ms）
+const float JUMP_CM = 3.0;           // 50 ms 內球不可能移動超過 3 cm，超過就先當錯誤讀值
+const uint8_t JUMP_MAX = 3;          // 連續 3 筆都跳 → 代表球真的在那裡，接受新值
 
 Servo servo;
 
 // 濾波器狀態
 float lastValid = 0;                 // setup() 會用第一筆讀值填入
+uint8_t jumpCount = 0;               // 連續「跳太多」的次數
 float hist[3];                       // 中位數用：最近 3 筆
 float avgBuf[N_AVG];                 // 移動平均用：環形緩衝區
 uint8_t avgIdx = 0;
@@ -92,10 +96,17 @@ float median3(float a, float b, float c) {
 }
 
 // ------------------------------------------------------------
-// 三段濾波：剔除錯誤值 → 中位數(3) 去尖峰 → 移動平均(N) 壓雜訊
+// 三段濾波：剔除錯誤值（超出範圍 / 跳太多）→ 中位數(3) 去尖峰 → 移動平均(N) 壓雜訊
 // ------------------------------------------------------------
 float filterDistance(float raw) {
-  if (raw < MIN_CM || raw > MAX_CM) raw = lastValid;   // 1) 錯誤值沿用上一筆
+  if (raw < MIN_CM || raw > MAX_CM) {                 // 1) 超出範圍：沿用上一筆
+    raw = lastValid;
+  } else if (fabs(raw - lastValid) > JUMP_CM && jumpCount < JUMP_MAX) {
+    raw = lastValid;                                  //    突然跳太多：先當錯誤值
+    jumpCount++;
+  } else {
+    jumpCount = 0;
+  }
   lastValid = raw;
 
   hist[0] = hist[1];                                  // 2) 中位數：單點尖峰直接消失

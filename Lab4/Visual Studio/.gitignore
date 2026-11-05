@@ -1,0 +1,5 @@
+# Visual Studio / dotnet 編譯產出與個人設定，不用上傳
+bin/
+obj/
+.vs/
+*.user
